@@ -374,7 +374,7 @@ function renderQuiz() {
 
     <div class="choices-grid" id="choicesGrid">
       ${shuffled.map(c => `
-        <button class="choice-btn" onclick="selectAnswer(this, ${JSON.stringify(c)})">
+        <button class="choice-btn" onclick='selectAnswer(this, ${JSON.stringify(c)})'>
           ${c}
         </button>
       `).join('')}
