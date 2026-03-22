@@ -129,7 +129,7 @@
 <div class="page-hero">
   <div class="page-hero-inner">
     <h1>🎯 패턴 <span>퀴즈</span></h1>
-    <p>코드 상황을 보고 어떤 패턴을 적용하면 좋은지 맞혀보세요! 10문제 도전!</p>
+    <p>코드 상황을 보고 어떤 패턴을 적용하면 좋은지 맞혀보세요! 23문제 도전!</p>
   </div>
 </div>
 
@@ -138,9 +138,9 @@
 
     <!-- 진행 바 -->
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
-      <span id="progressText" style="font-size:0.85rem;color:var(--text-muted);white-space:nowrap;">1 / 10</span>
+      <span id="progressText" style="font-size:0.85rem;color:var(--text-muted);white-space:nowrap;">1 / 23</span>
       <div class="progress-bar-wrap" style="flex:1;">
-        <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+        <div class="progress-bar-fill" id="progressFill" style="width:4%"></div>
       </div>
       <span id="scoreText" style="font-size:0.85rem;color:var(--accent-green);white-space:nowrap;">✅ 0</span>
     </div>
@@ -170,25 +170,238 @@
 
 <script>
 const QUIZ = [
+  // ─── 생성 패턴 ───
   {
-    q: '매번 new AppConfig()를 하니 설정값이 제각각 달라요!',
-    context: '여러 파일에서 new AppConfig()를 호출했더니 어디서는 dbUrl이 "localhost", 어디서는 "production"으로 달라집니다.',
-    code: `// 문제 코드
-const config1 = new AppConfig()
-const config2 = new AppConfig()
-config1.dbUrl = 'production'
+    q: '쇼핑몰 설정값이 파일마다 달라져요!',
+    context: '여러 파일에서 new ShopConfig()를 호출했더니 어디서는 apiEndpoint가 "localhost", 어디서는 "api.myshop.com"으로 달라집니다.',
+    code: `const config1 = new ShopConfig()
+const config2 = new ShopConfig()
+config1.apiEndpoint = 'https://api.myshop.com'
 
-console.log(config2.dbUrl) // 'localhost' ← 달라요!`,
+console.log(config2.apiEndpoint) // 'http://localhost:8080' ← 달라요!`,
     answer: 'Singleton (싱글톤)',
     choices: ['Factory Method (팩토리 메서드)', 'Singleton (싱글톤)', 'Prototype (프로토타입)', 'Builder (빌더)'],
-    feedback: '✅ <strong>싱글톤(Singleton)</strong>이 정답입니다!\n\nprivate static instance 하나만 만들면 어디서든 <em>같은</em> Config 객체를 사용합니다. getInstance()로만 접근하게 하면 끝!',
-    hint: '이 패턴은 클래스에 static instance를 두고, private 생성자로 외부 new를 막습니다.',
+    feedback: '✅ <strong>싱글톤(Singleton)</strong>이 정답입니다!\n\nprivate static instance 하나만 만들면 어디서든 같은 ShopConfig 객체를 사용합니다. getInstance()로만 접근하게 하면 끝!',
+    hint: 'static instance를 두고 private 생성자로 외부 new를 막습니다.',
     cat: '생성', catColor: 'badge-creational',
     patternId: 'singleton'
   },
   {
+    q: '주문 생성자에 파라미터가 6개... 뭐가 뭔지 모르겠어요!',
+    context: 'new Order(productId, quantity, address, couponCode, giftWrap, paymentMethod) — 호출 코드만 봐서는 각 인자가 뭔지 알 수 없어요.',
+    code: `// 이걸 호출하는 쪽에서 뭐가 뭔지 알 수 없다!
+const order = new Order(
+  'PROD-001', 2, '서울시 강남구',
+  undefined, true, 'card'
+)`,
+    answer: 'Builder (빌더)',
+    choices: ['Prototype (프로토타입)', 'Abstract Factory (추상 팩토리)', 'Builder (빌더)', 'Factory Method (팩토리 메서드)'],
+    feedback: '✅ <strong>빌더(Builder)</strong>가 정답입니다!\n\n.product().quantity().shipTo().useCoupon().giftWrap().payWith().place() 처럼 메서드 체이닝으로 단계별로 설정하면 읽기가 훨씬 쉬워집니다!',
+    hint: '레고처럼 단계별로 조립 — 메서드 체이닝으로 명확한 이름과 함께 설정.',
+    cat: '생성', catColor: 'badge-creational',
+    patternId: 'builder'
+  },
+  {
+    q: '배송사가 추가될 때마다 createShipping 함수를 직접 수정해야 해요!',
+    context: 'CJ, 롯데 외에 한진택배가 추가되면 createShipping 함수의 if/else를 또 열어야 합니다. 개방-폐쇄 원칙을 지킬 수 없을까요?',
+    code: `function createShipping(type: string) {
+  if (type === 'cj') {
+    return { ship: (addr: string) => console.log(\`CJ → \${addr}\`) }
+  } else if (type === 'lotte') {
+    return { ship: (addr: string) => console.log(\`롯데 → \${addr}\`) }
+  }
+  // 새 배송사 추가할 때마다 이 함수 수정!
+}`,
+    answer: 'Factory Method (팩토리 메서드)',
+    choices: ['Abstract Factory (추상 팩토리)', 'Strategy (전략)', 'Factory Method (팩토리 메서드)', 'Builder (빌더)'],
+    feedback: '✅ <strong>팩토리 메서드(Factory Method)</strong>가 정답입니다!\n\n각 배송사를 Shipping 인터페이스로 구현하고, ShippingFactory를 상속해 createShipping()만 오버라이드합니다. 새 배송사 추가 시 기존 코드를 건드리지 않아도 됩니다!',
+    hint: '"어떤 클래스를 만들지"를 서브클래스에 위임 — 객체 생성을 캡슐화합니다.',
+    cat: '생성', catColor: 'badge-creational',
+    patternId: 'factory-method'
+  },
+  {
+    q: 'PC와 모바일 UI가 뒤섞여요! 플랫폼별로 일관된 세트가 필요해요.',
+    context: '모바일에서는 상품카드도 모바일, 네비게이션도 모바일이어야 하는데, 지금은 플랫폼 체크가 여기저기 흩어져 있어요.',
+    code: `function render(platform: string) {
+  if (platform === 'mobile') {
+    renderMobileProductCard()
+    renderMobileNavBar()
+  } else {
+    renderPCProductCard()
+    renderPCNavBar()
+  }
+  // 새 플랫폼 추가 → 코드 곳곳을 수정!
+}`,
+    answer: 'Abstract Factory (추상 팩토리)',
+    choices: ['Factory Method (팩토리 메서드)', 'Abstract Factory (추상 팩토리)', 'Bridge (브릿지)', 'Decorator (데코레이터)'],
+    feedback: '✅ <strong>추상 팩토리(Abstract Factory)</strong>가 정답입니다!\n\nMobileUIFactory, PCUIFactory처럼 플랫폼별 팩토리를 만들면 createProductCard()와 createNavBar()가 항상 같은 플랫폼 세트를 반환합니다. 앱은 팩토리만 알면 됩니다!',
+    hint: '연관된 객체 패밀리를 일관되게 생성 — "모바일이면 전부 모바일".',
+    cat: '생성', catColor: 'badge-creational',
+    patternId: 'abstract-factory'
+  },
+  {
+    q: '기본 상품을 복사해서 프리미엄 상품을 만들고 싶어요.',
+    context: '기본 티셔츠 객체를 복사해 프리미엄 버전을 만들려는데, 속성이 많아 수동 복사가 너무 번거롭습니다.',
+    code: `const base = new Product('기본 티셔츠', 29000, '의류', ['면', '기본'])
+
+// 속성을 하나씩 수동으로 복사...
+const premium = new Product(
+  base.name, base.price, base.category, [...base.tags]
+)
+premium.name = '프리미엄 티셔츠'
+premium.price = 59000`,
+    answer: 'Prototype (프로토타입)',
+    choices: ['Builder (빌더)', 'Prototype (프로토타입)', 'Singleton (싱글톤)', 'Factory Method (팩토리 메서드)'],
+    feedback: '✅ <strong>프로토타입(Prototype)</strong>이 정답입니다!\n\nclone() 메서드를 구현하면 base.clone() 한 줄로 복사 완료! 속성이 늘어나도 clone() 내부만 관리하면 됩니다.',
+    hint: '복잡한 객체를 처음부터 만드는 대신 기존 객체를 복사합니다.',
+    cat: '생성', catColor: 'badge-creational',
+    patternId: 'prototype'
+  },
+  // ─── 구조 패턴 ───
+  {
+    q: '외부 PG사 SDK 메서드명이 달라 바로 쓸 수 없어요!',
+    context: '우리 앱은 pg.pay(amount)를 쓰는데, TossPaymentsSDK는 requestPayment(price, currency) 형식입니다. SDK 코드는 수정 불가예요.',
+    code: `// 우리가 원하는 인터페이스
+interface PaymentGateway {
+  pay(amount: number): void
+  refund(orderId: string): void
+}
+
+// 외부 SDK (수정 불가!)
+class TossPaymentsSDK {
+  requestPayment(price: number, currency: string) { ... }
+  cancelPayment(txId: string) { ... }
+}
+// 어떻게 연결할까요?`,
+    answer: 'Adapter (어댑터)',
+    choices: ['Facade (퍼사드)', 'Bridge (브릿지)', 'Decorator (데코레이터)', 'Adapter (어댑터)'],
+    feedback: '✅ <strong>어댑터(Adapter)</strong>가 정답입니다!\n\nTossAdapter를 만들어 pay()를 requestPayment()로 변환합니다. 마치 110V↔220V 어댑터처럼, 기존 코드를 건드리지 않고 연결합니다!',
+    hint: '다른 인터페이스를 우리가 원하는 인터페이스로 변환해주는 중간 변환기.',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'adapter'
+  },
+  {
+    q: '상품 옵션 조합마다 새 클래스를 만들어야 해서 클래스가 폭발해요!',
+    context: '선물포장, 빠른배송 옵션을 조합할 때마다 ProductWithGiftWrap, ProductWithFastShipping, ProductWithBoth... 클래스가 끝없이 늘어납니다.',
+    code: `class BasicProduct         { price() { return 29000 } }
+class ProductWithGiftWrap  { price() { return 31000 } }
+class ProductWithFastShip  { price() { return 32000 } }
+class ProductWithBothOpts  { price() { return 34000 } }
+// 옵션이 하나 더 생기면? 클래스 수 기하급수 증가!`,
+    answer: 'Decorator (데코레이터)',
+    choices: ['Composite (컴포지트)', 'Decorator (데코레이터)', 'Strategy (전략)', 'Bridge (브릿지)'],
+    feedback: '✅ <strong>데코레이터(Decorator)</strong>가 정답입니다!\n\nGiftWrapDecorator, FastShippingDecorator를 만들어 자유롭게 감싸면 됩니다. new FastShippingDecorator(new GiftWrapDecorator(new BasicProduct())) — 마치 마트료시카처럼!',
+    hint: '상속 없이 객체를 감싸서 기능을 동적으로 추가합니다.',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'decorator'
+  },
+  {
+    q: '상품 하나 주문하려면 5개 객체를 직접 다 조작해야 해요!',
+    context: '주문 버튼을 누르면 재고확인, 쿠폰적용, 결제, 배송예약, 알림 발송을 모두 직접 호출해야 합니다.',
+    code: `const inventory = new Inventory(); inventory.check('PROD-001')
+const coupon = new CouponService(); coupon.apply('SAVE10')
+const payment = new Payment(); payment.charge('card', 29000)
+const shipping = new Shipping(); shipping.schedule('서울시 강남구')
+const notification = new Notification(); notification.sendEmail('주문 완료!')`,
+    answer: 'Facade (퍼사드)',
+    choices: ['Facade (퍼사드)', 'Mediator (중재자)', 'Composite (컴포지트)', 'Proxy (프록시)'],
+    feedback: '✅ <strong>퍼사드(Facade)</strong>가 정답입니다!\n\nOrderFacade를 만들어 placeOrder() 하나로 모든 것을 처리합니다. 사용자는 내부 복잡성을 몰라도 됩니다!',
+    hint: '건물 정면처럼 — 내부 복잡성을 숨기고 단순한 인터페이스만 노출.',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'facade'
+  },
+  {
+    q: '같은 상품 정보를 매번 DB에서 조회해 성능이 느려요!',
+    context: 'getProduct(id)를 100번 호출하면 100번 DB를 조회합니다. 같은 id라면 한 번만 조회하고 재사용하고 싶어요.',
+    code: `class ProductService {
+  getProduct(id: string) {
+    console.log(\`DB 조회: \${id}\`)
+    return db.find(id)
+    // 같은 id라도 매번 DB 조회 😱
+  }
+}`,
+    answer: 'Proxy (프록시)',
+    choices: ['Decorator (데코레이터)', 'Flyweight (플라이웨이트)', 'Proxy (프록시)', 'Facade (퍼사드)'],
+    feedback: '✅ <strong>프록시(Proxy)</strong>가 정답입니다!\n\nCachedProductService를 만들어 Map에 결과를 저장합니다. 같은 인터페이스를 구현하므로 기존 코드를 바꿀 필요 없이 교체할 수 있습니다.',
+    hint: '실제 객체 앞에 대리인을 두어 캐싱·접근제어·로깅을 투명하게 추가.',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'proxy'
+  },
+  {
+    q: '카테고리와 상품을 처리할 때마다 instanceof 분기가 필요해요!',
+    context: '카테고리 안에 상품이 있고 또 카테고리가 있는 트리 구조인데, 전체 합계를 구할 때마다 타입 체크를 해야 합니다.',
+    code: `function getTotalPrice(item: any): number {
+  if (item instanceof Product) {
+    return item.price
+  } else if (item instanceof Category) {
+    return item.items.reduce(
+      (sum: number, i: any) => sum + getTotalPrice(i), 0
+    )
+  }
+  return 0
+}`,
+    answer: 'Composite (컴포지트)',
+    choices: ['Iterator (이터레이터)', 'Visitor (비지터)', 'Composite (컴포지트)', 'Decorator (데코레이터)'],
+    feedback: '✅ <strong>컴포지트(Composite)</strong>가 정답입니다!\n\nProduct와 Category가 공통 CatalogItem 인터페이스를 구현하면 getPrice()를 동일하게 호출할 수 있습니다. instanceof 분기가 사라집니다!',
+    hint: '단일 객체와 복합 객체를 동일하게 취급 — 트리 구조에 딱!',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'composite'
+  },
+  {
+    q: '상품카드 × PC/모바일 조합마다 클래스를 따로 만들어야 해요!',
+    context: 'ProductCardPC, ProductCardMobile, BannerPC, BannerMobile... 컴포넌트나 플랫폼이 하나 추가될 때마다 클래스가 기하급수로 늘어납니다.',
+    code: `class ProductCardPC     { render() {} }
+class ProductCardMobile { render() {} }
+class BannerPC          { render() {} }
+class BannerMobile      { render() {} }
+// 컴포넌트 1개 추가 → 클래스 2개 추가
+// 플랫폼 1개 추가  → 클래스 n개 추가!`,
+    answer: 'Bridge (브릿지)',
+    choices: ['Abstract Factory (추상 팩토리)', 'Decorator (데코레이터)', 'Adapter (어댑터)', 'Bridge (브릿지)'],
+    feedback: '✅ <strong>브릿지(Bridge)</strong>가 정답입니다!\n\n컴포넌트(ProductCard, Banner)와 플랫폼(PCRenderer, MobileRenderer)을 분리합니다. 클래스 수 = 컴포넌트 수 + 플랫폼 수! 조합 폭발을 막을 수 있습니다.',
+    hint: '"모양"과 "렌더러" 두 차원을 독립적으로 확장할 수 있게 분리합니다.',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'bridge'
+  },
+  {
+    q: '지도에 상품 마커 100만 개를 그리면 메모리가 부족해요!',
+    context: '지도의 각 상품 마커가 카테고리 아이콘 이미지(수 MB)를 각자 저장합니다. 같은 카테고리라면 이미지를 공유할 수 없을까요?',
+    code: `class ProductMarker {
+  constructor(
+    public x: number, public y: number,
+    public image: string,    // 수 MB — 마커마다 중복 저장!
+    public category: string
+  ) {}
+}
+// 100만 개 마커 = image × 100만 → 메모리 초과!`,
+    answer: 'Flyweight (플라이웨이트)',
+    choices: ['Prototype (프로토타입)', 'Singleton (싱글톤)', 'Proxy (프록시)', 'Flyweight (플라이웨이트)'],
+    feedback: '✅ <strong>플라이웨이트(Flyweight)</strong>가 정답입니다!\n\n공유 데이터(image, category)를 ProductIconType으로 분리하고, 팩토리를 통해 같은 타입은 인스턴스를 재사용합니다. 마커 100만 개여도 IconType은 카테고리 수만큼만!',
+    hint: '유사 객체에서 공통 부분만 공유해 메모리를 대폭 줄입니다.',
+    cat: '구조', catColor: 'badge-structural',
+    patternId: 'flyweight'
+  },
+  // ─── 행위 패턴 ───
+  {
+    q: '재고가 바뀔 때마다 알려줘야 할 곳을 직접 호출하고 있어요!',
+    context: '재고가 변경되면 장바구니, 위시리스트, 관리자 대시보드에 알려야 합니다. 구독자가 늘수록 setStock 함수가 거대해져요.',
+    code: `setStock(n: number) {
+  this.stock = n
+  cartComponent.update(n)      // 직접 호출
+  wishlistService.notify(n)    // 직접 호출
+  adminDashboard.refresh(n)    // 직접 호출
+  // 새 구독자 → 여기를 또 수정...
+}`,
+    answer: 'Observer (옵저버)',
+    choices: ['Mediator (중재자)', 'Observer (옵저버)', 'Chain of Responsibility (책임 연쇄)', 'Command (커맨드)'],
+    feedback: '✅ <strong>옵저버(Observer)</strong>가 정답입니다!\n\nsubscribe(), notify()로 구독자를 자동으로 통지합니다. 새 구독자 추가 시 setStock을 수정할 필요가 없습니다!',
+    hint: '유튜브 구독처럼 — 이벤트 발생 시 등록된 구독자에게 자동 알림.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'observer'
+  },
+  {
     q: '결제 수단마다 if/else 블록이 점점 길어져요!',
-    context: '카드, 카카오, 네이버 결제가 추가될 때마다 checkout 함수에 else if를 붙이고 있습니다. 계속 이렇게 해야 하나요?',
+    context: '카드, 카카오페이, 네이버페이가 추가될 때마다 checkout 함수에 else if를 붙이고 있습니다.',
     code: `function checkout(method: string, amount: number) {
   if (method === 'card') { /* 카드 처리 */ }
   else if (method === 'kakao') { /* 카카오 처리 */ }
@@ -203,152 +416,183 @@ console.log(config2.dbUrl) // 'localhost' ← 달라요!`,
     patternId: 'strategy'
   },
   {
-    q: '상태 변화를 여러 컴포넌트에 일일이 알려줘야 해요!',
-    context: '주식 가격이 바뀌면 차트, 알림, 로그 세 곳을 직접 업데이트 해야 합니다. 구독자가 늘어날수록 setPrice 함수가 거대해져요.',
-    code: `setPrice(price: number) {
-  this.price = price
-  chartComponent.update(price)      // 직접 호출
-  notificationService.send(price)   // 직접 호출
-  logService.record(price)          // 직접 호출
-  // 새 구독자 → 여기를 또 수정...
-}`,
-    answer: 'Observer (옵저버)',
-    choices: ['Mediator (중재자)', 'Observer (옵저버)', 'Chain of Responsibility (책임 연쇄)', 'Command (커맨드)'],
-    feedback: '✅ <strong>옵저버(Observer)</strong>가 정답입니다!\n\nsubscribe(), notify()로 구독자를 자동으로 통지합니다. 새 구독자 추가 시 기존 코드를 수정할 필요가 없습니다!',
-    hint: '유튜브 채널 구독처럼 — 새 영상(이벤트) 발생 시 구독자에게 자동 알림.',
-    cat: '행위', catColor: 'badge-behavioral',
-    patternId: 'observer'
-  },
-  {
-    q: 'LoggerAdapter 객체를 만들어야 하는데, 외부 라이브러리 인터페이스가 달라요!',
-    context: '우리 앱은 logger.log(msg)를 쓰는데, 외부 라이브러리는 logger.writeLog("INFO", msg) 형식입니다. 라이브러리 코드는 수정 불가예요.',
-    code: `// 우리가 원하는 인터페이스
-interface Logger { log(msg: string): void }
+    q: '장바구니에서 상품 추가를 Undo하고 싶어요!',
+    context: '사용자가 상품을 장바구니에 담았다가 취소하고 싶은데, 직접 호출 방식으로는 Undo 이력을 남기기 어렵습니다.',
+    code: `class ShoppingCart {
+  private items: string[] = []
 
-// 외부 라이브러리 (수정 불가!)
-class ThirdPartyLogger {
-  writeLog(level: string, msg: string) { ... }
-}
-// 어떻게 연결할까요?`,
-    answer: 'Adapter (어댑터)',
-    choices: ['Facade (퍼사드)', 'Bridge (브릿지)', 'Decorator (데코레이터)', 'Adapter (어댑터)'],
-    feedback: '✅ <strong>어댑터(Adapter)</strong>가 정답입니다!\n\n중간에 LoggerAdapter 클래스를 만들어 log() 호출을 writeLog() 호출로 변환합니다. 마치 110V↔220V 어댑터처럼요!',
-    hint: '다른 인터페이스를 우리가 원하는 인터페이스로 변환해주는 중간 변환기.',
-    cat: '구조', catColor: 'badge-structural',
-    patternId: 'adapter'
-  },
-  {
-    q: '텍스트 에디터에서 Ctrl+Z Undo 기능을 구현하려면?',
-    context: '사용자가 글을 입력하거나 삭제할 때마다 이전 상태로 되돌릴 수 있어야 합니다. 어떤 패턴이 이 구조에 딱 맞을까요?',
-    code: `class Editor {
-  content = ''
-
-  // 이 작업들을 Undo 가능하게 만들고 싶어요
-  type(text: string) { this.content += text }
-  delete(n: number)  { this.content = this.content.slice(0, -n) }
-
-  // Undo 어떻게 구현하지?
+  addItem(product: string)    { this.items.push(product) }
+  removeItem(product: string) { this.items = this.items.filter(i => i !== product) }
+  // Undo 구현하려면? 상태를 매번 저장해야 해서 복잡해짐
 }`,
     answer: 'Command (커맨드)',
     choices: ['Memento (메멘토)', 'Command (커맨드)', 'Iterator (이터레이터)', 'State (상태)'],
-    feedback: '✅ <strong>커맨드(Command)</strong>가 정답입니다!\n\n각 동작(type, delete)을 Command 객체로 만들어 execute()와 undo()를 함께 저장합니다. history 스택에 쌓아두면 Undo가 쉽게 구현됩니다!',
+    feedback: '✅ <strong>커맨드(Command)</strong>가 정답입니다!\n\nAddItemCommand에 execute()와 undo()를 함께 담아 history 스택에 쌓습니다. undoLast()를 호출하면 마지막 동작이 취소됩니다!',
     hint: '"요청을 객체로" — execute()와 undo()를 하나의 객체로 캡슐화합니다.',
     cat: '행위', catColor: 'badge-behavioral',
     patternId: 'command'
   },
   {
-    q: '영화를 보려면 TV, 스피커, 플레이어를 모두 직접 켜야 해요!',
-    context: '사용자가 theater.watchMovie()만 호출하면 알아서 준비되었으면 좋겠어요. 현재는 5개 객체를 직접 조작해야 합니다.',
-    code: `// 현재: 사용자가 다 알아야 함
-const tv = new TV(); tv.on()
-const speaker = new Speaker(); speaker.on(); speaker.setVolume(30)
-const lights = new Lights(); lights.dim(20)
-const player = new BluRay(); player.on(); player.play('movie')
-
-// 원하는 모습:
-theater.watchMovie('어벤져스') // 한 줄!`,
-    answer: 'Facade (퍼사드)',
-    choices: ['Facade (퍼사드)', 'Mediator (중재자)', 'Composite (컴포지트)', 'Proxy (프록시)'],
-    feedback: '✅ <strong>퍼사드(Facade)</strong>가 정답입니다!\n\n복잡한 서브시스템 앞에 단순한 창구를 제공합니다. 내부 복잡성을 숨기고 watchMovie() 하나로 모든 것을 처리합니다.',
-    hint: '건물 정면처럼 — 내부 복잡성을 숨기고 단순한 인터페이스만 노출.',
-    cat: '구조', catColor: 'badge-structural',
-    patternId: 'facade'
-  },
-  {
-    q: '생성자에 파라미터가 8개... 뭐가 뭔지 모르겠어요!',
-    context: 'new Email(to, from, subject, body, cc, bcc, isHtml, attachments) — 호출 코드만 봐서는 순서를 알 수가 없어요.',
-    code: `// 이걸 호출하는 쪽에서 뭐가 뭔지 알 수 없다!
-const email = new Email(
-  'to@a.com', 'from@b.com', '제목', '내용',
-  undefined, undefined, true, ['doc.pdf']
-)`,
-    answer: 'Builder (빌더)',
-    choices: ['Prototype (프로토타입)', 'Abstract Factory (추상 팩토리)', 'Builder (빌더)', 'Factory Method (팩토리 메서드)'],
-    feedback: '✅ <strong>빌더(Builder)</strong>가 정답입니다!\n\n.to().from().subject().body().asHtml().attach().send() 처럼 메서드 체이닝으로 단계별로 설정하면 읽기가 훨씬 쉬워집니다!',
-    hint: '레고처럼 단계별로 조립 — 메서드 체이닝으로 명확한 이름과 함께 설정.',
-    cat: '생성', catColor: 'badge-creational',
-    patternId: 'builder'
-  },
-  {
-    q: 'DB를 매번 조회하면 느린데, 어떻게 최적화할까요?',
-    context: 'getUser(id)를 100번 호출하면 100번 DB를 조회합니다. 같은 id라면 한 번만 조회하고 재사용하고 싶어요.',
-    code: `class UserService {
-  getUser(id: string) {
-    console.log(\`DB 조회: \${id}\`)
-    return db.find(id)
-    // 같은 id라도 매번 DB 조회 😱
+    q: '주문 상태마다 동작이 달라 if/else가 복잡해요!',
+    context: '주문이 "결제대기" → "결제완료" → "배송중" → "배송완료"로 바뀔수록 next() 함수의 if/else가 끝없이 늘어납니다.',
+    code: `class Order {
+  state = 'pending'
+  next() {
+    if (this.state === 'pending')      { this.state = 'paid' }
+    else if (this.state === 'paid')    { this.state = 'shipping' }
+    else if (this.state === 'shipping') { this.state = 'delivered' }
+    // 상태 추가 시 여러 곳을 수정해야 함
   }
 }`,
-    answer: 'Proxy (프록시)',
-    choices: ['Decorator (데코레이터)', 'Flyweight (플라이웨이트)', 'Proxy (프록시)', 'Facade (퍼사드)'],
-    feedback: '✅ <strong>프록시(Proxy)</strong>가 정답입니다!\n\nCachedUserService를 만들어 Map에 결과를 저장합니다. 같은 인터페이스를 구현하므로 기존 코드를 바꿀 필요 없이 교체할 수 있습니다.',
-    hint: '실제 객체 앞에 대리인을 두어 캐싱·접근제어·로깅을 투명하게 추가.',
-    cat: '구조', catColor: 'badge-structural',
-    patternId: 'proxy'
+    answer: 'State (상태)',
+    choices: ['Strategy (전략)', 'Command (커맨드)', 'Observer (옵저버)', 'State (상태)'],
+    feedback: '✅ <strong>상태(State)</strong>가 정답입니다!\n\nPendingState, PaidState, ShippingState, DeliveredState 각각을 클래스로 만들고 상태 전환 시 객체를 교체합니다. if/else 없이 동작이 자동으로 바뀝니다!',
+    hint: '상태 자체를 객체로 — 상태가 바뀌면 다른 클래스의 동작이 실행됩니다.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'state'
   },
   {
-    q: 'CSV와 JSON 파서가 과정은 똑같은데 한 단계만 다를 때!',
-    context: '데이터 읽기 → 파싱 → 집계 순서는 같고, "파싱" 단계만 CSV/JSON마다 다릅니다. 중복 코드를 없앨 수 있을까요?',
-    code: `// 중복 코드
-class CSVParser {
-  parse(data: string) {
-    const raw = data         // 읽기 (동일)
-    const nums = raw.split(',').map(Number) // CSV 전용
-    return nums.reduce((a,b)=>a+b) // 집계 (동일)
+    q: '일반/특급 주문 이메일이 순서는 같은데 본문만 달라 코드가 중복돼요!',
+    context: '헤더 → 본문 → 푸터 순서는 동일한데, 본문 내용만 다릅니다. 같은 코드를 두 클래스에 복붙하고 있어요.',
+    code: `class NormalOrderEmail {
+  send(orderId: string) {
+    const header = '<h1>주문 확인</h1>'           // 동일
+    const body   = \`<p>일반 배송 3~5일</p>\`     // 다름
+    return header + body + '<footer>감사합니다</footer>' // 동일
   }
 }
-class JSONParser {
-  parse(data: string) {
-    const raw = data         // 읽기 (동일) ← 중복!
-    const nums = JSON.parse(raw) // JSON 전용
-    return nums.reduce((a:number,b:number)=>a+b) // 집계 (동일) ← 중복!
+class ExpressOrderEmail {
+  send(orderId: string) {
+    const header = '<h1>주문 확인</h1>'           // 중복!
+    const body   = \`<p>당일 특급배송 🚀</p>\`    // 다름
+    return header + body + '<footer>감사합니다</footer>' // 중복!
   }
 }`,
     answer: 'Template Method (템플릿 메서드)',
     choices: ['Strategy (전략)', 'Abstract Factory (추상 팩토리)', 'Template Method (템플릿 메서드)', 'Bridge (브릿지)'],
-    feedback: '✅ <strong>템플릿 메서드(Template Method)</strong>가 정답입니다!\n\n부모 클래스에서 parse()의 순서를 고정하고, parseData() abstract 메서드만 서브클래스에서 다르게 구현합니다. 공통 코드는 한 곳에!',
-    hint: '레시피(순서)는 고정, 재료(세부 구현)만 서브클래스에서.",',
+    feedback: '✅ <strong>템플릿 메서드(Template Method)</strong>가 정답입니다!\n\n부모 클래스에서 send()의 순서를 고정하고, buildBody() abstract 메서드만 서브클래스에서 다르게 구현합니다. 공통 코드는 한 곳에!',
+    hint: '레시피(순서)는 고정, 재료(세부 구현)만 서브클래스에서 결정.',
     cat: '행위', catColor: 'badge-behavioral',
     patternId: 'template-method'
   },
   {
-    q: '주문 상태마다 동작이 달라 if/else가 복잡해요!',
-    context: '주문이 "결제대기" → "결제완료" → "배송중" → "배송완료"로 변할수록, handle() 함수의 if/else가 끝없이 늘어납니다.',
-    code: `handle(action: string) {
-  if (this.status === '결제대기') {
-    if (action === 'pay') { ... }
-  } else if (this.status === '결제완료') {
-    if (action === 'ship') { ... }
-    if (action === 'cancel') { ... }
+    q: '쿠폰 · 회원 · 세일 할인 처리가 중첩 if로 복잡해요!',
+    context: '할인 종류가 늘어날수록 applyDiscount 함수의 if/else가 길어지고, 각 할인 로직이 한 곳에 뒤섞입니다.',
+    code: `function applyDiscount(type: string, amount: number): number {
+  if (type === 'coupon') {
+    return amount * 0.9
+  } else if (type === 'member') {
+    return amount * 0.95
+  } else if (type === 'sale') {
+    return amount * 0.8
   }
-  // 상태가 늘수록 if 블록이 폭발...
+  return amount
 }`,
-    answer: 'State (상태)',
-    choices: ['Strategy (전략)', 'Command (커맨드)', 'Observer (옵저버)', 'State (상태)'],
-    feedback: '✅ <strong>상태(State)</strong>가 정답입니다!\n\n각 상태(결제대기, 배송중 등)를 별도의 클래스로 만들고, 상태 전환 시 객체를 교체합니다. if/else 없이 동작이 자동으로 바뀝니다!',
-    hint: '상태 자체를 객체로 — 상태가 바뀌면 다른 클래스의 동작이 실행됩니다.',
+    answer: 'Chain of Responsibility (책임 연쇄)',
+    choices: ['Strategy (전략)', 'Chain of Responsibility (책임 연쇄)', 'Decorator (데코레이터)', 'Command (커맨드)'],
+    feedback: '✅ <strong>책임 연쇄(Chain of Responsibility)</strong>가 정답입니다!\n\nCouponHandler → MemberHandler → SaleHandler를 체인으로 연결합니다. 각 핸들러는 자기 할인만 처리하고 나머지는 다음으로 넘깁니다. 새 할인 추가 = 새 핸들러 클래스!',
+    hint: 'Express 미들웨어처럼 요청이 핸들러를 차례로 통과합니다.',
     cat: '행위', catColor: 'badge-behavioral',
-    patternId: 'state'
+    patternId: 'chain-of-resp'
+  },
+  {
+    q: '검색창이 바뀌면 정렬 버튼을 직접 참조해서 업데이트해요. 결합도가 너무 높아요!',
+    context: 'SearchInput이 SortDropdown을 직접 참조하고, SortDropdown이 ResultPanel을 직접 참조합니다. 컴포넌트끼리 강하게 엮여 있어요.',
+    code: `class SearchInput {
+  sortDropdown: SortDropdown  // 직접 참조!
+  onChange(keyword: string) {
+    this.sortDropdown.enable(keyword.length > 0)
+  }
+}
+class SortDropdown {
+  resultPanel: ResultPanel    // 직접 참조!
+  enable(v: boolean) {
+    this.resultPanel.show(v ? '목록' : '키워드를 입력해주세요')
+  }
+}`,
+    answer: 'Mediator (중재자)',
+    choices: ['Observer (옵저버)', 'Facade (퍼사드)', 'Mediator (중재자)', 'Chain of Responsibility (책임 연쇄)'],
+    feedback: '✅ <strong>중재자(Mediator)</strong>가 정답입니다!\n\nSearchMediator를 두면 컴포넌트끼리 직접 참조하지 않아도 됩니다. 모든 상호작용을 중재자가 관리하므로 컴포넌트를 독립적으로 교체할 수 있습니다!',
+    hint: '공항 관제탑처럼 — 객체들이 서로 직접 통신하지 않고 중재자를 통해 통신.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'mediator'
+  },
+  {
+    q: '장바구니 이전 상태로 되돌리고 싶은데, 히스토리가 외부에 노출돼요!',
+    context: '장바구니 history를 public 배열로 관리하다 보니 외부에서 직접 조작할 수 있어 캡슐화가 깨집니다.',
+    code: `class Cart {
+  items: string[] = []
+  history: string[][] = []  // 외부에 구현 노출!
+
+  save() { this.history.push([...this.items]) }
+  undo() {
+    if (this.history.length) {
+      this.items = this.history.pop()!
+    }
+  }
+}`,
+    answer: 'Memento (메멘토)',
+    choices: ['Command (커맨드)', 'Memento (메멘토)', 'Prototype (프로토타입)', 'State (상태)'],
+    feedback: '✅ <strong>메멘토(Memento)</strong>가 정답입니다!\n\nCartMemento 클래스로 스냅샷을 저장하고, CartHistory가 스택을 관리합니다. Cart는 내부 구현을 노출하지 않고도 save/restore가 가능합니다!',
+    hint: '게임 세이브 파일처럼 — 내부 구현을 노출하지 않고 상태를 저장·복원.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'memento'
+  },
+  {
+    q: '상품 목록 내부 배열을 외부에 직접 노출하고 있어요!',
+    context: 'getData()로 내부 배열을 반환하다 보니 외부에서 직접 조작이 가능하고, 자료구조를 바꾸면 사용하는 코드도 다 바꿔야 합니다.',
+    code: `class ProductList {
+  private products: string[] = []
+  add(product: string) { this.products.push(product) }
+  getData() { return this.products }  // 내부 배열 노출!
+}
+
+// 내부 구조에 의존 — 자료구조가 바뀌면 이 코드도 수정
+list.getData().forEach(p => console.log(p))`,
+    answer: 'Iterator (이터레이터)',
+    choices: ['Composite (컴포지트)', 'Visitor (비지터)', 'Proxy (프록시)', 'Iterator (이터레이터)'],
+    feedback: '✅ <strong>이터레이터(Iterator)</strong>가 정답입니다!\n\nSymbol.iterator를 구현하면 내부 배열을 노출하지 않고도 for...of, spread로 순회할 수 있습니다. 자료구조가 바뀌어도 사용하는 코드는 그대로!',
+    hint: 'JS의 for...of가 동작하는 원리 — Symbol.iterator를 구현합니다.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'iterator'
+  },
+  {
+    q: '실물/디지털 상품에 새 기능을 추가할 때마다 두 클래스를 모두 수정해요!',
+    context: '배송비 계산, 영수증 출력 기능을 추가할 때마다 PhysicalProduct와 DigitalProduct 클래스를 모두 열어야 합니다.',
+    code: `class PhysicalProduct {
+  getPrice() { return 29000 }
+  // "배송비 계산" 추가 → 이 클래스 수정!
+  // "영수증 출력" 추가 → 이 클래스 또 수정!
+}
+class DigitalProduct {
+  getPrice() { return 9900 }
+  // 기능이 늘수록 두 클래스 모두 계속 수정...
+}`,
+    answer: 'Visitor (비지터)',
+    choices: ['Decorator (데코레이터)', 'Strategy (전략)', 'Visitor (비지터)', 'Template Method (템플릿 메서드)'],
+    feedback: '✅ <strong>비지터(Visitor)</strong>가 정답입니다!\n\nPriceCalculator, ReceiptExporter를 별도 Visitor 클래스로 만듭니다. 새 기능 추가 = 새 Visitor 클래스 추가. 기존 Product 클래스는 수정하지 않아도 됩니다!',
+    hint: '세금 계산원이 집을 방문하듯 — 기존 클래스를 수정하지 않고 새 동작을 추가.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'visitor'
+  },
+  {
+    q: '쿠폰 할인 규칙이 복잡해져서 함수를 계속 수정해야 해요!',
+    context: '"10% 할인 후 3,000원 추가 할인"처럼 할인 규칙이 조합될수록 applyDiscount 함수가 계속 커집니다.',
+    code: `// 규칙이 바뀔 때마다 이 함수를 직접 수정!
+function applyDiscount(code: string, amount: number): number {
+  const parts = code.split('+')
+  return parts.reduce((total, p) => {
+    if (p.trim() === 'RATE10') return total * 0.9
+    return total
+  }, amount)
+  // 새 할인 규칙 추가 → 이 함수 크게 수정
+}`,
+    answer: 'Interpreter (인터프리터)',
+    choices: ['Chain of Responsibility (책임 연쇄)', 'Strategy (전략)', 'Interpreter (인터프리터)', 'Composite (컴포지트)'],
+    feedback: '✅ <strong>인터프리터(Interpreter)</strong>가 정답입니다!\n\nRateDiscount, FixedDiscount, CombinedDiscount를 각각 클래스로 만들어 재귀적으로 조합합니다. 새 할인 규칙 추가 = 새 클래스만 추가!',
+    hint: '문법 규칙을 클래스로 표현 — 재귀적인 언어 구조를 해석합니다.',
+    cat: '행위', catColor: 'badge-behavioral',
+    patternId: 'interpreter'
   }
 ]
 
