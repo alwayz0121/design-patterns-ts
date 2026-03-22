@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeScript 기초 개념 — TS 디자인 패턴</title>
+  <meta name="description" content="디자인 패턴을 이해하기 위해 필요한 TypeScript 핵심 개념 7가지를 예제로 배워보세요.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">⚡ TS 디자인 패턴</a>
+    <a href="index.html" class="nav-link">홈</a>
+    <a href="ts-concepts.html" class="nav-link active">TS 기초</a>
+    <a href="patterns.html" class="nav-link">패턴 탐색기</a>
+    <a href="playground.html" class="nav-link">퀴즈</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <h1>📘 <span>TypeScript</span> 기초 개념</h1>
+    <p>디자인 패턴을 이해하려면 이 7가지 개념이 필수입니다. 예제와 함께 차근차근 익혀봐요.</p>
+  </div>
+</div>
+
+<main class="main">
+
+  <div class="info-box">
+    💡 <strong>학습 순서 추천:</strong> 1번부터 순서대로 읽으면 디자인 패턴 코드가 훨씬 잘 이해됩니다. 
+    이미 아는 개념은 건너뛰어도 괜찮아요!
+  </div>
+
+  <!-- 1. interface -->
+  <div class="concept-card" id="interface">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">🤝</span>
+      <div>
+        <div class="concept-title">1. Interface — 약속(계약)을 정의한다</div>
+      </div>
+      <span class="concept-tag">가장 중요!</span>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        인터페이스는 <strong>"이 객체는 반드시 이런 기능을 가져야 해"</strong>라는 약속입니다.<br>
+        디자인 패턴의 핵심은 <em>구체적인 클래스가 아닌 인터페이스에 의존</em>하는 것입니다.
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">interface</span> <span class="concept-keyword">implements</span></div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="cm">// ❌ 나쁜 예: 구체적인 클래스에 의존</span>
+<span class="kw">class</span> <span class="cls">KakaoNotifier</span> {
+  send(msg: <span class="tp">string</span>) { console.log(<span class="str">`카카오: ${msg}`</span>) }
+}
+<span class="kw">class</span> <span class="cls">App</span> {
+  notifier = <span class="kw">new</span> <span class="cls">KakaoNotifier</span>() <span class="cm">// ← KakaoNotifier에 묶여버림!</span>
+}
+
+<span class="cm">// ✅ 좋은 예: 인터페이스에 의존</span>
+<span class="kw">interface</span> <span class="cls">Notifier</span> {
+  send(message: <span class="tp">string</span>): <span class="tp">void</span>  <span class="cm">// 이렇게 동작해야 해!</span>
+}
+
+<span class="kw">class</span> <span class="cls">KakaoNotifier</span> <span class="kw">implements</span> <span class="cls">Notifier</span> {
+  send(message: <span class="tp">string</span>) { console.log(<span class="str">`카카오: ${message}`</span>) }
+}
+<span class="kw">class</span> <span class="cls">EmailNotifier</span> <span class="kw">implements</span> <span class="cls">Notifier</span> {
+  send(message: <span class="tp">string</span>) { console.log(<span class="str">`이메일: ${message}`</span>) }
+}
+
+<span class="kw">class</span> <span class="cls">App</span> {
+  <span class="cm">// Notifier 인터페이스를 사용 → 어떤 알림이든 교체 가능!</span>
+  <span class="kw">constructor</span>(<span class="kw">private</span> notifier: <span class="cls">Notifier</span>) {}
+  notify(msg: <span class="tp">string</span>) { <span class="kw">this</span>.notifier.send(msg) }
+}
+
+<span class="kw">const</span> app1 = <span class="kw">new</span> <span class="cls">App</span>(<span class="kw">new</span> <span class="cls">KakaoNotifier</span>())
+<span class="kw">const</span> app2 = <span class="kw">new</span> <span class="cls">App</span>(<span class="kw">new</span> <span class="cls">EmailNotifier</span>()) <span class="cm">// 코드 변경 없이 교체!</span></code></pre>
+      </div>
+      <p style="color:var(--accent-cyan);font-size:0.9rem;margin-top:12px;">🔑 <strong>핵심:</strong> 인터페이스는 <em>어떻게 구현할지는 모르고, 무엇을 할 수 있는지만</em> 정의합니다. Strategy, Observer 패턴에서 핵심적으로 사용됩니다.</p>
+    </div>
+  </div>
+
+  <!-- 2. abstract class -->
+  <div class="concept-card" id="abstract">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">🏛️</span>
+      <div>
+        <div class="concept-title">2. Abstract Class — "틀"을 제공하는 클래스</div>
+      </div>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        추상 클래스는 <strong>직접 인스턴스를 만들 수 없는 클래스</strong>입니다.<br>
+        공통 기능은 구현하고, 자식 클래스마다 다른 부분은 <code>abstract</code>로 남겨둡니다.
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">abstract</span> <span class="concept-keyword">extends</span></div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="cm">// Template Method 패턴에서 사용!</span>
+<span class="kw">abstract class</span> <span class="cls">Report</span> {
+  <span class="cm">// 공통 흐름 (변하지 않음)</span>
+  generate(): <span class="tp">void</span> {
+    <span class="kw">this</span>.<span class="fn">fetchData</span>()
+    <span class="kw">this</span>.<span class="fn">format</span>()     <span class="cm">// ← 각 자식이 다르게 구현</span>
+    <span class="kw">this</span>.<span class="fn">print</span>()
+  }
+
+  <span class="kw">private</span> <span class="fn">fetchData</span>() { console.log(<span class="str">"데이터 불러오는 중..."</span>) }
+  <span class="kw">private</span> <span class="fn">print</span>()     { console.log(<span class="str">"출력 완료"</span>) }
+
+  <span class="cm">// 자식클래스에서 반드시 구현해야 하는 부분</span>
+  <span class="kw">abstract</span> <span class="fn">format</span>(): <span class="tp">void</span>
+}
+
+<span class="kw">class</span> <span class="cls">PdfReport</span> <span class="kw">extends</span> <span class="cls">Report</span> {
+  <span class="fn">format</span>() { console.log(<span class="str">"PDF 형식으로 변환"</span>) }
+}
+<span class="kw">class</span> <span class="cls">ExcelReport</span> <span class="kw">extends</span> <span class="cls">Report</span> {
+  <span class="fn">format</span>() { console.log(<span class="str">"엑셀 형식으로 변환"</span>) }
+}
+
+<span class="kw">const</span> report = <span class="kw">new</span> <span class="cls">PdfReport</span>()
+report.<span class="fn">generate</span>()
+<span class="cm">// 데이터 불러오는 중...  → PDF 형식으로 변환  → 출력 완료</span></code></pre>
+      </div>
+      <p style="color:var(--accent-cyan);font-size:0.9rem;margin-top:12px;">🔑 <strong>핵심:</strong> 인터페이스는 구현이 없고, 추상 클래스는 <em>공통 구현</em>을 가질 수 있습니다. Template Method 패턴의 핵심입니다.</p>
+    </div>
+  </div>
+
+  <!-- 3. Generic -->
+  <div class="concept-card" id="generic">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">🔤</span>
+      <div>
+        <div class="concept-title">3. Generic — 타입을 파라미터처럼 전달하기</div>
+      </div>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        제네릭은 <strong>"어떤 타입이든 안전하게 쓸 수 있는 코드"</strong>를 만드는 방법입니다.<br>
+        <code>&lt;T&gt;</code>를 타입의 변수라고 생각하면 쉽습니다.
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">&lt;T&gt;</span> <span class="concept-keyword">&lt;T extends&gt;</span></div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="cm">// T는 나중에 정해지는 타입 (마치 변수처럼)</span>
+<span class="kw">class</span> <span class="cls">Stack</span>&lt;<span class="tp">T</span>&gt; {
+  <span class="kw">private</span> items: <span class="tp">T</span>[] = []
+
+  push(item: <span class="tp">T</span>): <span class="tp">void</span> {
+    <span class="kw">this</span>.items.push(item)
+  }
+  pop(): <span class="tp">T</span> | <span class="tp">undefined</span> {
+    <span class="kw">return</span> <span class="kw">this</span>.items.pop()
+  }
+}
+
+<span class="cm">// T = number로 결정됨</span>
+<span class="kw">const</span> numStack = <span class="kw">new</span> <span class="cls">Stack</span>&lt;<span class="tp">number</span>&gt;()
+numStack.push(<span class="num">42</span>)
+numStack.push(<span class="str">"hello"</span>) <span class="cm">// ❌ 타입 에러! number가 아님</span>
+
+<span class="cm">// T = string으로 결정됨</span>
+<span class="kw">const</span> strStack = <span class="kw">new</span> <span class="cls">Stack</span>&lt;<span class="tp">string</span>&gt;()
+strStack.push(<span class="str">"안녕!"</span>) <span class="cm">// ✅ OK</span>
+
+<span class="cm">// Factory 패턴 등에서 제네릭이 자주 사용됩니다</span>
+<span class="kw">function</span> <span class="fn">create</span>&lt;<span class="tp">T</span>&gt;(cls: <span class="kw">new</span>() => <span class="tp">T</span>): <span class="tp">T</span> {
+  <span class="kw">return new</span> cls()
+}</code></pre>
+      </div>
+      <p style="color:var(--accent-cyan);font-size:0.9rem;margin-top:12px;">🔑 <strong>핵심:</strong> <code>any</code>는 타입 안전성이 없고, Generic은 <em>타입 안전성을 유지하면서</em> 재사용 가능한 코드를 만듭니다.</p>
+    </div>
+  </div>
+
+  <!-- 4. 접근 제어자 -->
+  <div class="concept-card" id="modifiers">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">🔒</span>
+      <div>
+        <div class="concept-title">4. 접근 제어자 — 무엇을 공개하고 감출지</div>
+      </div>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        클래스 내부 데이터를 어디서 접근할 수 있는지 제어합니다. <strong>캡슐화(Encapsulation)</strong>의 핵심입니다.
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">public</span> <span class="concept-keyword">private</span> <span class="concept-keyword">protected</span> <span class="concept-keyword">readonly</span></div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="kw">class</span> <span class="cls">BankAccount</span> {
+  <span class="kw">public</span> owner: <span class="tp">string</span>    <span class="cm">// 어디서든 접근 가능</span>
+  <span class="kw">private</span> balance: <span class="tp">number</span>  <span class="cm">// 클래스 내부에서만!</span>
+  <span class="kw">protected</span> id: <span class="tp">string</span>   <span class="cm">// 클래스 + 자식 클래스까지</span>
+  <span class="kw">readonly</span> createdAt: <span class="tp">Date</span> <span class="cm">// 읽기 전용 (변경 불가)</span>
+
+  <span class="kw">constructor</span>(owner: <span class="tp">string</span>, balance: <span class="tp">number</span>) {
+    <span class="kw">this</span>.owner = owner
+    <span class="kw">this</span>.balance = balance
+    <span class="kw">this</span>.createdAt = <span class="kw">new</span> <span class="cls">Date</span>()
+    <span class="kw">this</span>.id = <span class="cls">Math</span>.random().toString()
+  }
+
+  <span class="cm">// 잔액은 메서드를 통해서만 변경 가능 (안전!)</span>
+  deposit(amount: <span class="tp">number</span>) {
+    <span class="kw">if</span> (amount &gt; <span class="num">0</span>) <span class="kw">this</span>.balance += amount
+  }
+  getBalance(): <span class="tp">number</span> { <span class="kw">return</span> <span class="kw">this</span>.balance }
+}
+
+<span class="kw">const</span> acc = <span class="kw">new</span> <span class="cls">BankAccount</span>(<span class="str">"홍길동"</span>, <span class="num">1000</span>)
+acc.owner            <span class="cm">// ✅ OK</span>
+acc.balance          <span class="cm">// ❌ 에러: private</span>
+acc.deposit(<span class="num">500</span>)   <span class="cm">// ✅ OK</span>
+acc.getBalance()     <span class="cm">// ✅ 1500</span>
+
+<span class="cm">// 생성자 단축 문법 (더 깔끔!)</span>
+<span class="kw">class</span> <span class="cls">User</span> {
+  <span class="kw">constructor</span>(
+    <span class="kw">public</span> name: <span class="tp">string</span>,     <span class="cm">// 자동으로 this.name 생성</span>
+    <span class="kw">private</span> age: <span class="tp">number</span>
+  ) {}
+}</code></pre>
+      </div>
+      <p style="color:var(--accent-cyan);font-size:0.9rem;margin-top:12px;">🔑 <strong>핵심:</strong> Singleton 패턴에서 <code>private constructor</code>를 사용해 외부에서 new를 못 하게 막습니다!</p>
+    </div>
+  </div>
+
+  <!-- 5. 타입 유니온/교차 -->
+  <div class="concept-card" id="union">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">🔀</span>
+      <div>
+        <div class="concept-title">5. 유니온 & 교차 타입 — OR과 AND</div>
+      </div>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        <code>|</code>는 "이것 또는 저것", <code>&</code>는 "이것 이면서 저것"입니다.<br>
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">A | B</span> <span class="concept-keyword">A & B</span> <span class="concept-keyword">type</span></div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="cm">// 유니온 타입 (OR): string 또는 number</span>
+<span class="kw">type</span> <span class="cls">ID</span> = <span class="tp">string</span> | <span class="tp">number</span>
+<span class="kw">const</span> userId: <span class="cls">ID</span> = <span class="str">"U001"</span>  <span class="cm">// ✅</span>
+<span class="kw">const</span> postId: <span class="cls">ID</span> = <span class="num">42</span>       <span class="cm">// ✅</span>
+
+<span class="cm">// 좁히기 (Narrowing)</span>
+<span class="kw">function</span> <span class="fn">printId</span>(id: <span class="cls">ID</span>) {
+  <span class="kw">if</span> (<span class="kw">typeof</span> id === <span class="str">"string"</span>) {
+    console.log(id.<span class="fn">toUpperCase</span>()) <span class="cm">// string임이 확실</span>
+  } <span class="kw">else</span> {
+    console.log(id.<span class="fn">toFixed</span>(<span class="num">2</span>))   <span class="cm">// number임이 확실</span>
+  }
+}
+
+<span class="cm">// 교차 타입 (AND): 두 타입을 합침</span>
+<span class="kw">interface</span> <span class="cls">Serializable</span> { serialize(): <span class="tp">string</span> }
+<span class="kw">interface</span> <span class="cls">Printable</span>    { print(): <span class="tp">void</span> }
+
+<span class="kw">type</span> <span class="cls">Document</span> = <span class="cls">Serializable</span> <span class="op">&amp;</span> <span class="cls">Printable</span>
+
+<span class="kw">class</span> <span class="cls">Report</span> <span class="kw">implements</span> <span class="cls">Serializable</span>, <span class="cls">Printable</span> {
+  serialize() { <span class="kw">return</span> <span class="cls">JSON</span>.<span class="fn">stringify</span>(<span class="kw">this</span>) }
+  print()     { console.log(<span class="kw">this</span>.<span class="fn">serialize</span>()) }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. readonly & optional -->
+  <div class="concept-card" id="readonly">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">📌</span>
+      <div>
+        <div class="concept-title">6. readonly & Optional — 불변성과 선택적 속성</div>
+      </div>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        <code>readonly</code>는 값을 변경 불가로 만들고, <code>?</code>는 없어도 되는 옵션 속성입니다.
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">readonly</span> <span class="concept-keyword">?</span> (optional)</div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="kw">interface</span> <span class="cls">Config</span> {
+  <span class="kw">readonly</span> apiUrl: <span class="tp">string</span>    <span class="cm">// 반드시 있어야 하고, 변경 불가</span>
+  timeout?: <span class="tp">number</span>           <span class="cm">// 있어도 되고 없어도 됨</span>
+  retries?: <span class="tp">number</span>
+}
+
+<span class="kw">const</span> config: <span class="cls">Config</span> = {
+  apiUrl: <span class="str">"https://api.example.com"</span>
+  <span class="cm">// timeout, retries는 생략 가능!</span>
+}
+
+config.apiUrl = <span class="str">"..."</span>  <span class="cm">// ❌ 에러: readonly라 변경 불가</span>
+
+<span class="cm">// Prototype 패턴에서 객체 복사 시 readonly 주의 필요</span>
+<span class="kw">type</span> <span class="cls">Immutable</span>&lt;<span class="tp">T</span>&gt; = { <span class="kw">readonly</span> [K <span class="kw">in</span> <span class="kw">keyof</span> <span class="tp">T</span>]: <span class="tp">T</span>[K] }
+<span class="cm">// 모든 속성을 readonly로!
+
+// optional을 활용하는 Builder 패턴</span>
+<span class="kw">interface</span> <span class="cls">UserOptions</span> {
+  name: <span class="tp">string</span>
+  email?: <span class="tp">string</span>
+  role?: <span class="str">'admin'</span> | <span class="str">'user'</span> | <span class="str">'guest'</span>
+}
+
+<span class="kw">function</span> <span class="fn">createUser</span>(options: <span class="cls">UserOptions</span>) {
+  <span class="kw">return</span> {
+    name: options.name,
+    email: options.email ?? <span class="str">'no-reply@example.com'</span>,
+    role: options.role ?? <span class="str">'user'</span>  <span class="cm">// null 병합 연산자</span>
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. 클래스와 인터페이스 -->
+  <div class="concept-card" id="class-interface">
+    <div class="concept-header" onclick="toggleConcept(this)">
+      <span class="concept-icon">🏗️</span>
+      <div>
+        <div class="concept-title">7. 클래스 심화 — extends vs implements + 다형성</div>
+      </div>
+      <span class="pattern-arrow">▶</span>
+    </div>
+    <div class="concept-body" style="display:none;">
+      <p class="concept-desc">
+        디자인 패턴의 핵심은 <strong>다형성(Polymorphism)</strong> — 같은 인터페이스로 다른 객체를 다루는 것입니다.
+      </p>
+      <div style="margin-bottom:8px;"><span class="concept-keyword">extends</span> <span class="concept-keyword">implements</span> <span class="concept-keyword">super</span></div>
+      <div class="code-block-wrap">
+        <div class="code-copy-btn" onclick="copyCode(this)">복사</div>
+        <pre><code><span class="cm">// extends: 클래스를 상속 (부모의 기능을 물려받음)</span>
+<span class="cm">// implements: 인터페이스를 구현 (약속을 지킴)</span>
+
+<span class="kw">interface</span> <span class="cls">Animal</span> {
+  speak(): <span class="tp">string</span>
+}
+
+<span class="kw">abstract class</span> <span class="cls">Pet</span> <span class="kw">implements</span> <span class="cls">Animal</span> {
+  <span class="kw">constructor</span>(<span class="kw">public</span> name: <span class="tp">string</span>) {}
+  <span class="kw">abstract</span> speak(): <span class="tp">string</span>  <span class="cm">// 자식이 구현</span>
+  greeting() { <span class="kw">return</span> <span class="str">`나는 ${<span class="kw">this</span>.name}`</span> }
+}
+
+<span class="kw">class</span> <span class="cls">Dog</span> <span class="kw">extends</span> <span class="cls">Pet</span> {
+  speak() { <span class="kw">return</span> <span class="str">"멍멍!"</span> }
+}
+<span class="kw">class</span> <span class="cls">Cat</span> <span class="kw">extends</span> <span class="cls">Pet</span> {
+  speak() { <span class="kw">return</span> <span class="str">"야옹~"</span> }
+}
+
+<span class="cm">// 다형성: 같은 Animal 타입으로 다른 동물을 다룸</span>
+<span class="kw">const</span> pets: <span class="cls">Animal</span>[] = [<span class="kw">new</span> <span class="cls">Dog</span>(<span class="str">"바둑이"</span>), <span class="kw">new</span> <span class="cls">Cat</span>(<span class="str">"나비"</span>)]
+pets.<span class="fn">forEach</span>(pet =&gt; console.log(pet.<span class="fn">speak</span>()))
+<span class="cm">// 멍멍!  /  야옹~</span>
+
+<span class="cm">// → 이게 바로 디자인 패턴의 핵심!</span>
+<span class="cm">// 새로운 동물을 추가해도 기존 코드를 수정할 필요가 없습니다 (OCP)</span></code></pre>
+      </div>
+      <p style="color:var(--accent-cyan);font-size:0.9rem;margin-top:12px;">🔑 <strong>핵심:</strong> 이 개념이 Strategy, Observer, Command 등 거의 모든 디자인 패턴의 기반입니다!</p>
+    </div>
+  </div>
+
+  <div style="text-align:center; margin-top:40px;">
+    <a href="patterns.html" class="btn btn-primary" style="font-size:1.1rem; padding:16px 36px;">
+      🗂️ 이제 디자인 패턴 배우러 가기 →
+    </a>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>GoF 디자인 패턴 학습 가이드 | TypeScript/JavaScript 초보자를 위해 제작</p>
+</footer>
+
+<script>
+function toggleConcept(header) {
+  const body = header.parentElement.querySelector('.concept-body')
+  const arrow = header.querySelector('.pattern-arrow')
+  const isOpen = body.style.display !== 'none'
+  body.style.display = isOpen ? 'none' : 'block'
+  arrow.style.transform = isOpen ? '' : 'rotate(90deg)'
+}
+
+function copyCode(btn) {
+  const code = btn.nextElementSibling.textContent
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '✓ 복사됨'
+    btn.classList.add('copied')
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied') }, 1500)
+  })
+}
+
+// Open first concept by default
+document.addEventListener('DOMContentLoaded', () => {
+  const first = document.querySelector('.concept-header')
+  if (first) first.click()
+})
+</script>
+</body>
+</html>
